@@ -1,4 +1,5 @@
 from habit import Habit
+from tabulate import tabulate
 from db import DatabaseStorage
 
 class HabitManager:
@@ -30,19 +31,11 @@ class HabitManager:
             period=period,
             )
         self.habits.append(habit)       # self.habits grows [Habit(id=1),Habit(id=2)]
-        self.storage.save_habit(habit)  # gets habid_id from save_habit function
+        self.storage.save_habit(habit)  # gets habit_id from save_habit function
         print(f"Created habit ID {habit.habit_id}")
         self.next_id += 1
 
         return habit
-
-    def load_habits(self):
-        """Load from storage, update next_id."""
-        self.habits = self.storage.load_all_habits()
-        if self.habits:
-            self.next_id = max(habit.habit_id for habit in self.habits) + 1
-        else:
-            self.next_id = 1
 
     def save_habits(self):
         """Save all in-memory habits (before exit)."""
@@ -84,3 +77,9 @@ class HabitManager:
             if habit.habit_id == habit_id:
                 return habit
         return None
+
+    def print_habits_table(self):
+        """Functional helper: Pretty table using str."""
+        table = [[h.habit_id, h.name, h.description, h.period, h.streak, len(h.completed_dates)]
+                 for h in self.habits]
+        print(tabulate(table, headers=["Nr","Name", "Description", "Period", "Streak", "Completions"], tablefmt="github"))

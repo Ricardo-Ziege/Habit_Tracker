@@ -1,6 +1,6 @@
 import sqlite3
 from habit import Habit
-import datetime
+from datetime import datetime as dt
 
 class DatabaseStorage:
     """Class establishes a database connection and enables loading and saving of habit data."""
@@ -103,7 +103,7 @@ class DatabaseStorage:
                 SELECT completed_dates FROM completions WHERE habit_id = ?
             """, (habit_id,))
 
-            habit.completed_dates = [datetime.fromisoformat(row[0]).date() for row in cursor.fetchall()]
+            habit.completed_dates = [dt.fromisoformat(row[0]).date() for row in cursor.fetchall()]
 
             return habit
 
@@ -115,14 +115,19 @@ class DatabaseStorage:
             return [(row[0]) for row in cursor.fetchall()]
 
     def load_all_habits(self):
-        """Retrieve all habits from the database for setup."""
+        """Load habits by ID + recompute streaks + return next_id info."""
         ids = self.load_habit_ids()
         habits = []
+        max_id = 0
         for habit_id in ids:
             habit = self.load_habit(habit_id)
-            if habit: # Safety
+            if habit:
+                habit.compute_streak()  # Recompute here
                 habits.append(habit)
-        return habits
+                max_id = max(max_id, habit.habit_id)
+
+        # Return tuple: habits + next_id
+        return habits, max_id + 1
 
     def delete_habit(self, habit_id):
         """

@@ -28,14 +28,28 @@ class Habit: # Create habit class
 
         longest_streak = 1
         current_streak = 1
-        expected_delta = timedelta(days=1) if self.period == "daily" else timedelta(days=7)
 
-        for i in range(1, len(sorted_dates)):
-            if sorted_dates[i] - sorted_dates[i - 1] == expected_delta:
-                current_streak += 1
-                longest_streak = max(longest_streak, current_streak)
-            else:
-                current_streak = 1
+        if self.period == "daily":
+            expected_delta = timedelta(days=1)
+            for i in range(1, len(sorted_dates)):
+                delta = sorted_dates[i] - sorted_dates[i - 1]
+                if delta == expected_delta:
+                    current_streak += 1
+                    longest_streak = max(longest_streak, current_streak)
+                else:
+                    current_streak = 1
+
+        elif self.period == "weekly":
+            min_delta = timedelta(days=7)
+            max_delta = timedelta(days=14)
+            for i in range(1, len(sorted_dates)):
+                delta = sorted_dates[i] - sorted_dates[i - 1]
+                # Accept any difference in dates greater 7 and smaller/equal to 14 days
+                if min_delta <= delta < max_delta:
+                    current_streak += 1
+                    longest_streak = max(longest_streak, current_streak)
+                else:
+                    current_streak = 1
 
         self.streak = longest_streak
 

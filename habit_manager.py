@@ -1,6 +1,5 @@
 from habit import Habit
 from tabulate import tabulate
-from db import DatabaseStorage
 
 class HabitManager:
     """Class provides in-memory storage of habits and methods to load habits from storage,
@@ -8,10 +7,9 @@ class HabitManager:
 
     def __init__(self, storage=None):
         """Initialize a new HabitManager instance with an empty list of habits."""
-        # Constructor injection
-        self.storage = storage # initial dependency to storage instance
-        self.habits = [] # and in-memory habit list
-        self.next_id = 1 # Generate unique habit ID
+        self.storage = storage  # Initial dependency to storage object
+        self.habits = []        # Create empty in-memory habit list
+        self.next_id = 1        # Generate next ID to current maximum ID
 
     def create_habit(self, name, description, period):
         """
@@ -23,24 +21,19 @@ class HabitManager:
             period: "daily" or "weekly" (str)
 
         Returns:
-            returns habit instance
+            returns habit object
         """
         habit = Habit(
             name=name,
             description=description,
             period=period,
             )
-        self.habits.append(habit)       # self.habits grows [Habit(id=1),Habit(id=2)]
-        self.storage.save_habit(habit)  # gets habit_id from save_habit function
-        print(f"Created habit ID {habit.habit_id}")
+        self.habits.append(habit)       # self.habits grows in memory [Habit(id=1),Habit(id=2),NewHabit(id=?)]
+        self.storage.save_habit(habit)  # saves habit metadata to database, assigns habit.habit_id
+        print(f"Created habit ID is {habit.habit_id}")
         self.next_id += 1
 
         return habit
-
-    def save_habits(self):
-        """Save all in-memory habits (before exit)."""
-        for habit in self.habits:
-            self.storage.save_habit(habit)
 
     def list_habits(self):
         """Return list of all habit names from in-memory storage."""
@@ -80,6 +73,25 @@ class HabitManager:
 
     def print_habits_table(self):
         """Functional helper: Pretty table using str."""
-        table = [[h.habit_id, h.name, h.description, h.period, h.streak, len(h.completed_dates)]
+        table = [[h.habit_id, h.name, h.description, h.period, len(h.completed_dates), h.streak]
                  for h in self.habits]
-        print(tabulate(table, headers=["Nr","Name", "Description", "Period", "Streak", "Completions"], tablefmt="github"))
+        print(tabulate(table,
+                        headers=["ID","Name", "Description", "Period", "Completions", "Streak"],
+                        tablefmt="github",
+                        showindex=range(1,len(self.habits)+1)
+                        ))
+        # Return mapping: {number: habit_id}
+        return {i + 1: h.habit_id for i, h in enumerate(self.habits)}
+
+    '''
+        def print_habits_table(self):
+            """Functional helper: Pretty table using str."""
+            table = [[h.name, h.description, h.period, len(h.completed_dates)] for h in self.habits]
+            print(tabulate(table,
+                            headers=["Name", "Description", "Periodicity", "Completions"],
+                            tablefmt="github",
+                            showindex=range(1,len(self.habits)+1)
+                            ))
+            # Return mapping: {number: habit_id}
+            return {i + 1: h.habit_id for i, h in enumerate(self.habits)}
+    '''

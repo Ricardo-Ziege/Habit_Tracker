@@ -26,8 +26,8 @@ class Habit: # Create habit class
             self.streak = 0
             return
 
-        longest_streak = 1
-        current_streak = 1
+        longest_streak = 1      # Best streak so far
+        current_streak = 1      # Streak ending at recent completion
 
         if self.period == "daily":
             expected_delta = timedelta(days=1)
@@ -47,7 +47,7 @@ class Habit: # Create habit class
                 # Accept any difference in dates greater 7 and smaller/equal to 14 days
                 if min_delta <= delta < max_delta:
                     current_streak += 1
-                    longest_streak = max(longest_streak, current_streak)
+                    longest_streak = max(longest_streak, current_streak)    # Historical maximum
                 else:
                     current_streak = 1
 

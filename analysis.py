@@ -46,6 +46,6 @@ def longest_streak_one(habits, habit_id):
         habits:     List of habit objects
         habit_id:   Habit ID
     Returns:
-
+        streak:     Longest streak
     """
     return next(h.streak for h in habits if h.habit_id == habit_id)

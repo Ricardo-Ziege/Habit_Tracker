@@ -45,7 +45,7 @@ def test_habit_completion():
     assert habit.completed_dates[-1] == date.today()
 
 # Test 5: Get Streak
-def test_habit_completion():
+def test_get_habit_streak():
     habit = Habit("Habit","Description", "Weekly")
     habit.completed_dates = [date(2025, 12, 10),
                              date(2025, 12, 23),

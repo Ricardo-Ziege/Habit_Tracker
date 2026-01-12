@@ -39,7 +39,7 @@ class DatabaseStorage:
                            """)
             conn.commit()
 
-    def save_habit(self, habit):  # saves current state of the habit to database
+    def save_habit(self, habit):  # Saves current state of a habit to database
         """Saves a habit to the database."""
         with sqlite3.connect(self._db_name) as conn:
             cursor = conn.cursor()
@@ -58,7 +58,7 @@ class DatabaseStorage:
                                INSERT INTO habits (name, description, period)
                                VALUES (?, ?, ?)
                                """, (habit.name, habit.description, habit.period))
-                habit.habit_id = int(cursor.lastrowid) # writes new habit.habit_id to last row of habits table
+                habit.habit_id = int(cursor.lastrowid) # writes new habit.habit_id as last row of habits table
                 print("DEBUG lastrowid after INSERT:", cursor.lastrowid)
 
             # Save dynamic tracking data
@@ -122,9 +122,9 @@ class DatabaseStorage:
         for habit_id in ids:
             habit = self.load_habit(habit_id)
             if habit:
-                habit.compute_streak()  # Recompute here
-                habits.append(habit)
-                max_id = max(max_id, habit.habit_id)
+                habit.compute_streak()  # Recompute streak here
+                habits.append(habit)    # Create new in-memory habits list
+                max_id = max(max_id, habit.habit_id)  # Calculate maximum ID from stored habits
 
         # Return tuple: habits + next_id
         return habits, max_id + 1

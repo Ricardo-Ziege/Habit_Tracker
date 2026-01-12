@@ -24,7 +24,7 @@ def create_sample_habits_and_completions():
     habit3.completed_dates.extend([today - timedelta(days=i) for i in range(21, 14, -1)])  # Days 15-21
     habit3.completed_dates = sorted(habit3.completed_dates)
 
-    # Habit4 (weekly): alternate weekly (2 completions, streak 1)
+    # Habit4 (weekly): alternate weekly (2 random completions in week 1 and 3, streak 1)
     habit4.completed_dates = [today - timedelta(weeks=3), today - timedelta(weeks=1)]
 
     # Habit5 (weekly): 4 consecutive weeks (4 completions, streak 4)
@@ -42,4 +42,3 @@ def setup_sample_data(manager):
         habit.compute_streak()              # Compute and persist streaks in habit objects
         manager.storage.save_habit(habit)   # Creates ID's, saves metadata and completions
         manager.habits.append(habit)        # Add to in-memory list
-

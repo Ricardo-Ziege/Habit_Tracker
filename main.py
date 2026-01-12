@@ -66,29 +66,28 @@ def main_loop():
 
 
         elif choice == "Create A New Habit":
-            name = questionary.text("What's the name of your habit?").ask()
-            description = questionary.text("What's the description?").ask()
-            periodicity = questionary.select("And periodicity?",choices=["daily","weekly"]).ask()
+            name = questionary.text("What's the name of your new habit?").ask()
+            description = questionary.text("What do you need to do to complete it?").ask()
+            periodicity = questionary.select("And how often you plan to do it?",choices=["daily","weekly"]).ask()
             if periodicity == "daily": period = "daily"
             elif periodicity == "weekly": period = "weekly"
 
             habit = manager.create_habit(name, description, period)
 
-
-            print(f" ID: {habit.habit_id} Created: '{habit.name}'")
-            print(f" Desc: {habit.description}, Period: {habit.period}")
+            print(f" Your new habit '{habit.name}' is created today!")
+            print(f" {habit.description} {habit.period} to complete it and come back.")
 
 
         elif choice == "Delete A Habit":
             if manager.habits:
                 num_id_mapping = manager.print_habits_table()  # Prints table and gets number-ID mapping
                 try:
-                    number = int(questionary.text("Enter Habit Number To Delete:",
+                    number = int(questionary.text("Enter The Habit Number To Delete:",
                                               validate=lambda x: x.isdigit()).ask())
                     habit_id = num_id_mapping.get(number)
                     if habit_id:
                         manager.delete_habit(habit_id)
-                        print(f" Deleted habit number {number}")
+                        print(f" Your Habit at position {number} was deleted.")
                     else:
                         print("Habit number not found.")
                 except ValueError:
@@ -104,23 +103,40 @@ def main_loop():
                                                       "List Your Habits By Periodicity",
                                                       "Calculate Longest Streak Of All Habits",
                                                       "Calculate Longest Streak Of Single Habit"]).ask()
+
                 if analyse == "List Your Habits":
-                    print(list_all_habits(manager.habits))
+                    habit_names = list_all_habits(manager.habits)
+                    habit_text = ", ".join(habit_names)
+                    print(f"You are currently tracking the habits {habit_text}. That's impressive!")
+
+
                 elif analyse == "List Your Habits By Periodicity":
                     periodicity = questionary.select("For Which Periodicity?", choices=["daily", "weekly"]).ask()
-                    print(list_habit_by_period(manager.habits, periodicity))
+                    habit_names = list_habit_by_period(manager.habits, periodicity)
+                    habit_text = ", ".join(habit_names)
+                    print(f"Your habits {habit_text} are to be completed {periodicity}.")
+
                 elif analyse == "Calculate Longest Streak Of All Habits":
-                    print(longest_streak_of_all(manager.habits))
-                elif analyse == "Calculate Longest Streak Of Single Habit":
+                    longest = longest_streak_of_all(manager.habits)
+                    print(f"Your longest streak is {longest[1]} completed with the habit {longest[0]}. Keep it up!")
+
+                elif analyse == "Calculate Longest Streak Of A Single Habit":
                     num_id_mapping = manager.print_habits_table()
                     number = int(questionary.text("Enter Habit Number To Calculate Streak Of:",
                                                 validate=lambda x: x.isdigit()).ask())
                     habit_id = num_id_mapping.get(number)
                     if habit_id:
-                        print(longest_streak_one(manager.habits, habit_id))
+                        streak = longest_streak_one(manager.habits, habit_id)
+                        habit = next((h for h in manager.habits if h.habit_id == habit_id), None)
+                        if habit:
+                            print(f"Your habit {habit.name} was completed {streak} consecutively. Carry on!")
+                        else:
+                            print("Habit not found.")
+                    else:
+                        print("Invalid habit number.")
+
             else:
                 print("No habits to analyze.")
-
 
         elif choice == "Exit":
             questionary.print("Have A Good One! See You Tomorrow!", style="bold fg:blue")

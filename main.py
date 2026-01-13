@@ -3,7 +3,8 @@ from tabulate import tabulate
 from analysis import list_all_habits, list_habit_by_period, longest_streak_of_all, longest_streak_one
 from habit_manager import HabitManager
 from db import DatabaseStorage
-from sample_data import setup_sample_data
+from sample_data import setup_sample_data, print_sample_data
+
 
 def main_loop():
     """The command line interface provides an interactive menu. It reads and translates user choices."""
@@ -15,7 +16,7 @@ def main_loop():
     manager = HabitManager(storage)     # Create manager object and hand-over storage object
 
     # Load existing habits and next_id from the database on startup
-    manager.habits, manager.next_id = storage.load_all_habits() or []
+    manager.habits = storage.load_all_habits()
 
     # Load sample habits if database returns empty list
     if not manager.habits:
@@ -47,32 +48,39 @@ def main_loop():
 
         elif choice == "Complete A Habit":
             if manager.habits:
-                num_id_mapping = manager.print_habits_table()   # Prints table and gets number-ID mapping
+                manager.print_habits_table()                    # Prints formatted table
+                num_id_mapping = manager.get_display_mapping()  # Gets number-ID mapping
                 try:
                     number = int(questionary.text("Enter habit number to complete:",
                                               validate=lambda x: x.isdigit()).ask())
                     habit_id = num_id_mapping.get(number)
                     if habit_id:
                         habit = manager.get_habit((habit_id))
-                        habit.complete_habit()
+                        if habit.complete_habit():
+                            print(f"Great! Habit {habit.name} is successfully completed today.")
+                            print(f"New streak is {habit.streak}. Keep it going!")
+                        else:
+                            print(f"Habit {habit.name} was already completed today.")
                         manager.storage.save_habit(habit)
-                        print(f"Habit {habit.name} is completed today!")
-                        print(f"New streak is {habit.streak}. Keep it going!")
                     else:
-                        print(f"Habit number not found.")
+                        print(f"Enter a valid number.")
                 except ValueError:
                     print(f"Enter a valid number.")
             else: print(f"No habits to complete.")
 
 
         elif choice == "Create A New Habit":
-            name = questionary.text("What's the name of your new habit?").ask()
-            description = questionary.text("What do you need to do to complete it?").ask()
-            periodicity = questionary.select("And how often you plan to do it?",choices=["daily","weekly"]).ask()
-            if periodicity == "daily": period = "daily"
-            elif periodicity == "weekly": period = "weekly"
+            name = questionary.text("What's the name of your new habit?",
+                                    validate=lambda x: len(x.strip()) > 0 or 'Type habit name.').ask()
+            while True:
+                desc = questionary.text("What do you need to do to complete it?",
+                                    validate=lambda x: len(x.strip()) > 0 or "Type habit description or ???").ask()
+                if desc.strip()== "???": print_sample_data()
+                else: break
+            period = questionary.select("And how often you plan to do it?",
+                                    choices=["daily","weekly"]).ask()
 
-            habit = manager.create_habit(name, description, period)
+            habit = manager.create_habit(name, desc, period)
 
             print(f" Your new habit '{habit.name}' is created today!")
             print(f" {habit.description} {habit.period} to complete it and come back.")
@@ -80,7 +88,8 @@ def main_loop():
 
         elif choice == "Delete A Habit":
             if manager.habits:
-                num_id_mapping = manager.print_habits_table()  # Prints table and gets number-ID mapping
+                manager.print_habits_table()                    # Prints formatted table
+                num_id_mapping = manager.get_display_mapping()  # Gets number-ID mapping
                 try:
                     number = int(questionary.text("Enter The Habit Number To Delete:",
                                               validate=lambda x: x.isdigit()).ask())
@@ -89,9 +98,9 @@ def main_loop():
                         manager.delete_habit(habit_id)
                         print(f" Your Habit at position {number} was deleted.")
                     else:
-                        print("Habit number not found.")
+                        print(f"Enter a valid number.")
                 except ValueError:
-                    print("Enter valid ID.")
+                    print(f"Enter a valid number.")
             else:
                 print("No habits to delete.")
 
@@ -102,7 +111,7 @@ def main_loop():
                                              choices=["List Your Habits",
                                                       "List Your Habits By Periodicity",
                                                       "Calculate Longest Streak Of All Habits",
-                                                      "Calculate Longest Streak Of Single Habit"]).ask()
+                                                      "Calculate Longest Streak Of A Single Habit"]).ask()
 
                 if analyse == "List Your Habits":
                     habit_names = list_all_habits(manager.habits)
@@ -118,22 +127,29 @@ def main_loop():
 
                 elif analyse == "Calculate Longest Streak Of All Habits":
                     longest = longest_streak_of_all(manager.habits)
-                    print(f"Your longest streak is {longest[1]} completed with the habit {longest[0]}. Keep it up!")
+                    if longest is None:
+                        print("No habits to analyze.")
+                    else:
+                        print(f"Your longest streak is {longest[1]} completions in a row with the habit {longest[0]}. "
+                          f"Keep it up!")
 
                 elif analyse == "Calculate Longest Streak Of A Single Habit":
-                    num_id_mapping = manager.print_habits_table()
-                    number = int(questionary.text("Enter Habit Number To Calculate Streak Of:",
-                                                validate=lambda x: x.isdigit()).ask())
-                    habit_id = num_id_mapping.get(number)
-                    if habit_id:
-                        streak = longest_streak_one(manager.habits, habit_id)
-                        habit = next((h for h in manager.habits if h.habit_id == habit_id), None)
-                        if habit:
-                            print(f"Your habit {habit.name} was completed {streak} consecutively. Carry on!")
+                    manager.print_habits_table()                    # Prints formatted table
+                    num_id_mapping = manager.get_display_mapping()  # Gets number-ID mapping
+                    try:
+                        number = int(questionary.text("Enter Habit Number To Calculate Streak Of:",
+                                                    validate=lambda x: x.isdigit()).ask())
+                        habit_id = num_id_mapping.get(number)
+                        if habit_id:
+                            longest = longest_streak_one(manager.habits, habit_id)
+                            if longest:
+                                print(f"Your habit {longest[0]} was completed {longest[1]} times in a row. Carry on!")
+                            else:
+                                print("Habit not found.")
                         else:
-                            print("Habit not found.")
-                    else:
-                        print("Invalid habit number.")
+                            print(f"Enter a valid number.")
+                    except ValueError:
+                        print(f"Enter a valid number.")
 
             else:
                 print("No habits to analyze.")

@@ -2,7 +2,6 @@ import pytest
 from analysis import list_all_habits, list_habit_by_period, longest_streak_of_all, longest_streak_one
 from sample_data import create_sample_habits_and_completions
 
-
 @pytest.fixture
 def habits():
     habits = create_sample_habits_and_completions()
@@ -33,5 +32,5 @@ def test_longest_streak_of_all(habits):
 
 # Test 4: Calculate streak for third habit stored in sample data
 def test_longest_streak_one(habits):
-    streak = longest_streak_one(habits, 3)
-    assert streak == 7
+    longest = longest_streak_one(habits, 3)
+    assert longest == ["Cook Meal", 7]

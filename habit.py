@@ -18,6 +18,8 @@ class Habit: # Create habit class
         if today not in self.completed_dates:
             self.completed_dates.append(today) # add new date entry to completed_dates list
             self.compute_streak()
+            return True
+        else: return False
 
     def compute_streak(self):
         """Compute longest streak based on periodicity ("daily" or "weekly")."""
@@ -44,7 +46,7 @@ class Habit: # Create habit class
             max_delta = timedelta(days=14)
             for i in range(1, len(sorted_dates)):
                 delta = sorted_dates[i] - sorted_dates[i - 1]
-                # Accept any difference in dates greater 7 and smaller/equal to 14 days
+                # Accept any date difference inclusive to 7 and exclusive to 14 days to continue streak
                 if min_delta <= delta < max_delta:
                     current_streak += 1
                     longest_streak = max(longest_streak, current_streak)    # Historical maximum
@@ -52,8 +54,4 @@ class Habit: # Create habit class
                     current_streak = 1
 
         self.streak = longest_streak
-
-    def get_streak(self):
-        """Returns current streak as an integer."""
-        return self.streak
 

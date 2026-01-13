@@ -9,7 +9,6 @@ class HabitManager:
         """Initialize a new HabitManager instance with an empty list of habits."""
         self.storage = storage  # Initial dependency to storage object
         self.habits = []        # Create empty in-memory habit list
-        self.next_id = 1        # Generate next ID to current maximum ID
 
     def create_habit(self, name, description, period):
         """
@@ -30,8 +29,6 @@ class HabitManager:
             )
         self.habits.append(habit)       # self.habits grows in memory [Habit(id=1),Habit(id=2),NewHabit(id=?)]
         self.storage.save_habit(habit)  # saves habit metadata to database, assigns habit.habit_id
-        print(f"Created habit ID is {habit.habit_id}")
-        self.next_id += 1
 
         return habit
 
@@ -72,7 +69,7 @@ class HabitManager:
         return None
 
     def print_habits_table(self):
-        """Functional helper: Pretty table using str."""
+        """Print overview in formatted table with tabulate making use of row indices as display numbers."""
         table = [[h.habit_id, h.name, h.description, h.period, len(h.completed_dates), h.streak]
                  for h in self.habits]
         print(tabulate(table,
@@ -80,18 +77,22 @@ class HabitManager:
                         tablefmt="github",
                         showindex=range(1,len(self.habits)+1)
                         ))
-        # Return mapping: {number: habit_id}
+
+    def get_display_mapping(self):
+        """Return mapping of display number and internal habit ID's."""
         return {i + 1: h.habit_id for i, h in enumerate(self.habits)}
 
     '''
-        def print_habits_table(self):
-            """Functional helper: Pretty table using str."""
-            table = [[h.name, h.description, h.period, len(h.completed_dates)] for h in self.habits]
-            print(tabulate(table,
-                            headers=["Name", "Description", "Periodicity", "Completions"],
-                            tablefmt="github",
-                            showindex=range(1,len(self.habits)+1)
-                            ))
-            # Return mapping: {number: habit_id}
-            return {i + 1: h.habit_id for i, h in enumerate(self.habits)}
+    def print_habits_table(self):
+        """Functional helper: Pretty table using str."""
+        table = [[h.name, h.description, h.period, len(h.completed_dates)] for h in self.habits]
+        print(tabulate(table,
+                        headers=["Name", "Description", "Periodicity", "Completions"],
+                        tablefmt="github",
+                        showindex=range(1,len(self.habits)+1)
+                        ))
+                        
+    def get_display_mapping(self):
+        # Return mapping: {entered number: internal habit_id}
+        return {i + 1: h.habit_id for i, h in enumerate(self.habits)}
     '''

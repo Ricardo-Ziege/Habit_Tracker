@@ -59,7 +59,6 @@ class DatabaseStorage:
                                VALUES (?, ?, ?)
                                """, (habit.name, habit.description, habit.period))
                 habit.habit_id = int(cursor.lastrowid) # writes new habit.habit_id as last row of habits table
-                print("DEBUG lastrowid after INSERT:", cursor.lastrowid)
 
             # Save dynamic tracking data
             # Get existing completions for this habit
@@ -115,19 +114,16 @@ class DatabaseStorage:
             return [(row[0]) for row in cursor.fetchall()]
 
     def load_all_habits(self):
-        """Load habits by ID + recompute streaks + return next_id info."""
+        """Load all habits and recompute streaks."""
         ids = self.load_habit_ids()
         habits = []
-        max_id = 0
         for habit_id in ids:
             habit = self.load_habit(habit_id)
             if habit:
                 habit.compute_streak()  # Recompute streak here
                 habits.append(habit)    # Create new in-memory habits list
-                max_id = max(max_id, habit.habit_id)  # Calculate maximum ID from stored habits
 
-        # Return tuple: habits + next_id
-        return habits, max_id + 1
+        return habits
 
     def delete_habit(self, habit_id):
         """
@@ -149,11 +145,9 @@ class DatabaseStorage:
 
             # Delete completions first
             cursor.execute("DELETE FROM completions WHERE habit_id = ?", (habit_id,))
-            print(f"Deleted {cursor.rowcount} completions")  # DEBUG
 
             # Delete habit
             cursor.execute("DELETE FROM habits WHERE habit_id = ?", (habit_id,))
-            print(f"Deleted habit {habit_id}, rowcount: {cursor.rowcount}")  # DEBUG
 
             conn.commit()
             return True

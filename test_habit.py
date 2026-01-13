@@ -22,17 +22,18 @@ def test_streak_calc_daily():
                              date(2025, 12, 11),
                              date(2025, 12, 13)]
     habit.compute_streak()
-    assert habit.streak == 2  # streak calculation works for consecutive dates
+    assert habit.streak == 2  # Streak calculation works for consecutive dates and breaks after 1 day gap
 
 # Test 3: Weekly habit completion + reset
 def test_streak_calc_weekly():
     habit = Habit("Habit","Description", "Weekly")
-    habit.completed_dates = [date(2025, 12, 10),
-                             date(2025, 12, 23),
-                             date(2025, 12, 24)
-                             ]
+    habit.completed_dates = [date(2025, 12, 1),
+                             date(2025, 12, 8),
+                             date(2025, 12, 15),
+                             date(2025, 12, 22),
+                             date(2025, 12, 29)]
     habit.compute_streak()
-    assert habit.streak == 2
+    assert habit.streak == 5
 
 # Test 4: Habit completion
 def test_habit_completion():
@@ -43,15 +44,3 @@ def test_habit_completion():
                              ]
     habit.complete_habit()
     assert habit.completed_dates[-1] == date.today()
-
-# Test 5: Get Streak
-def test_get_habit_streak():
-    habit = Habit("Habit","Description", "Weekly")
-    habit.completed_dates = [date(2025, 12, 10),
-                             date(2025, 12, 23),
-                             date(2025, 12, 24)
-                             ]
-    assert habit.streak == habit.get_streak()
-
-
-

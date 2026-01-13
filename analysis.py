@@ -36,6 +36,8 @@ def longest_streak_of_all(habits):
     Returns:
         List:       Pair of habit name and longest streak
     """
+    if not habits:
+        return None
     longest = max(habits, key=lambda h: h.streak)
     return [longest.name, longest.streak]
 
@@ -46,6 +48,9 @@ def longest_streak_one(habits, habit_id):
         habits:     List of habit objects
         habit_id:   Habit ID
     Returns:
-        streak:     Longest streak
+        str, int    Tuple of habit.name and longest streak
     """
-    return next(h.streak for h in habits if h.habit_id == habit_id)
+    habit = next((h for h in habits if h.habit_id == habit_id), None)
+    if habit is None:
+        return None
+    return [habit.name, habit.streak]

@@ -54,18 +54,18 @@ class Habit: # Create habit class
 
         Note:
             daily:      Consecutive days
-            weekly:     7 to <14 days apart
+            weekly:     Consecutive ISO weeks
 
-            Updates     self.current_streak
-                        self.longest_streak
+            Updates     self.current_streak == longest streak ending at most recent completion
+                        self.longest_streak == historically longest streak over all completions
         """
         sorted_dates = sorted(self.completed_dates)
         if not sorted_dates:
             self.streak = 0
             return
 
-        longest_streak = 1      # Best streak so far
-        current_streak = 1      # Streak ending at recent completion
+        longest_streak = 1
+        current_streak = 1
 
         if self.period == "daily":
             expected_delta = timedelta(days=1)
@@ -91,4 +91,3 @@ class Habit: # Create habit class
 
         self.longest_streak = longest_streak
         self.current_streak = current_streak
-

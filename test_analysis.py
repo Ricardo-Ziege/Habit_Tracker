@@ -38,7 +38,6 @@ def test_longest_streak_of_all(habits):
     result = longest_streak_of_all(habits)
     assert result == ["Read", 20]
 
-# Test 4: Calculate streak for third habit stored in sample data
 def test_longest_streak_one(habits):
     """Test longest_streak_one() returns historically longest streak for specific habit by ID."""
     longest = longest_streak_one(habits, 3)

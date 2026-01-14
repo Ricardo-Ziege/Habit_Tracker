@@ -1,56 +1,71 @@
-# Analytics Functional Module
-"""This module contains all required analysis functions."""
+"""
+----------------
+Analytics Module
+----------------
+Implements functional habit analysis.
+
+Pure functions using list comprehensions, max(), next() for:
+- Listing habits (all/ filtered by periodicity))
+- Streak computations (all/ single habit)
+
+Expects list of Habit objects.
+----------------
+"""
 
 def list_all_habits(habits):
     """
-    List all stored habit names using list comprehension.
+    Lists all stored habit names using list comprehension.
 
     Args:
-        habits:     List of habit objects
+        habits (list [Habit]):  List of Habit objects
 
     Returns:
-        List[str]:  List of habit names
+        list [str]:             List of habit names
     """
     return [h.name for h in habits]
 
 def list_habit_by_period(habits, period):
     """
-    List all stored habit names filtered by periodicity and using list comprehension
+    List habit names filtered by periodicity using list comprehension.
 
     Args:
-        habits:     List of habit objects
-        period:     Periodicity of habit
+        habits (list [Habit]):  List of Habit objects
+        period (str):           'daily' or 'weekly'
 
     Returns:
-        List:       List of habit names filtered by periodicity
+        list [str]:             List of matching habit names
     """
     return [h.name for h in habits if h.period == period]
 
 def longest_streak_of_all(habits):
     """
-    Return the longest streak of all habits
+    Find habit with longest historical streak across all habits.
 
     Args:
-        habits:     List of habit objects
+        habits (list [Habit]):  List of Habit objects.
 
     Returns:
-        List:       Pair of habit name and longest streak
+        list [str, int]:        [habit_name, streak] of maximum or
+                                None if empty.
     """
     if not habits:
         return None
-    longest = max(habits, key=lambda h: h.streak)
-    return [longest.name, longest.streak]
+    habit = max(habits, key=lambda h: h.longest_streak)
+    return [habit.name, habit.longest_streak]
 
 def longest_streak_one(habits, habit_id):
     """
-    Return the longest streak for a single habit
+    Get longest historical streak for a single habit by ID.
+
     Args:
-        habits:     List of habit objects
-        habit_id:   Habit ID
+        habits (list [Habit]):  List of Habit objects
+        habit_id (str):         Unique habit ID
+
     Returns:
-        str, int    Tuple of habit.name and longest streak
+        list [str, int]:        [habit_name, streak] or
+                                None if not found
     """
     habit = next((h for h in habits if h.habit_id == habit_id), None)
     if habit is None:
         return None
-    return [habit.name, habit.streak]
+    return [habit.name, habit.longest_streak]

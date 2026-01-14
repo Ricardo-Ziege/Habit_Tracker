@@ -1,46 +1,52 @@
+"""
+--------------------------
+Unit Tests for Habit Class
+--------------------------
+"""
+
 import pytest
 from datetime import date
 from habit import Habit
 
-#############################
-### Tests for Habit class ###
-#############################
-
-# Test 1: Habit creation
 def test_habit_creation():
+    """Test 1: Habit initialization with all attributes and period normalization."""
     habit = Habit("Habit", "Description", "Daily", 24)
     assert habit.name == "Habit"
     assert habit.description == "Description"
-    assert habit.period == "daily"  # gets converted to lowercase
+    assert habit.period == "daily"
     assert habit.habit_id == 24
-    assert habit.streak == 0
+    assert habit.current_streak == 0
+    assert habit.longest_streak == 0
+    assert habit.completed_dates == []
 
-# Test 2: Daily habit completion + reset
 def test_streak_calc_daily():
+    """Test 2: Daily current and longest streaks - consecutive days, breaks on +1 day gap."""
     habit = Habit("Habit","Description", "Daily")
     habit.completed_dates = [date(2025, 12, 10),
                              date(2025, 12, 11),
                              date(2025, 12, 13)]
     habit.compute_streak()
-    assert habit.streak == 2  # Streak calculation works for consecutive dates and breaks after 1 day gap
+    assert habit.current_streak == 1
+    assert habit.longest_streak == 2    # Consecutive 10-11.12, breaks at 13.12
 
-# Test 3: Weekly habit completion + reset
 def test_streak_calc_weekly():
+    """Test 2: Daily current and longest streaks - consecutive ISO weeks, breaks on +1 ISO week gap."""
     habit = Habit("Habit","Description", "Weekly")
-    habit.completed_dates = [date(2025, 12, 1),
-                             date(2025, 12, 8),
-                             date(2025, 12, 15),
-                             date(2025, 12, 22),
-                             date(2025, 12, 29)]
+    habit.completed_dates = [date(2026, 1, 1),      # ISO week 1: current = 1; longest = 1
+                             date(2026, 1, 8),      # ISO week 2: current = 2; longest = 2
+                             date(2026, 1, 19),     # ISO week 4: current = 1; longest = 2
+                             date(2026, 1, 26)]     # ISO week 5: current = 2; longest = 2
     habit.compute_streak()
-    assert habit.streak == 5
+    assert habit.current_streak == 2
+    assert habit.longest_streak == 2
 
-# Test 4: Habit completion
 def test_habit_completion():
+    """Test 4: complete_habit adds today and triggers streak recompute."""
     habit = Habit("Habit","Description", "Weekly")
     habit.completed_dates = [date(2025, 12, 10),
-                             date(2025, 12, 23),
-                             date(2025, 12, 24)
+                             date(2025, 12, 11),
+                             date(2025, 12, 13)
                              ]
     habit.complete_habit()
     assert habit.completed_dates[-1] == date.today()
+    assert habit.current_streak > 0

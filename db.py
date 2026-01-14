@@ -1,23 +1,33 @@
+"""
+-----------------------
+Database Storage Module
+-----------------------
+Implements DatabaseStorage class, used for SQLite persistence of habit and completion data.
+Splits static habit data (habits table) and dynamic tracking data (completions table).
+Integrates with HabitManager for CRUD operations in habit tracker.
+-----------------------
+"""
+
 import sqlite3
 from habit import Habit
 from datetime import datetime as dt
 
 class DatabaseStorage:
-    """Class establishes a database connection and enables loading and saving of habit data."""
+    """Establishes database connection and handles loading/saving of habit data."""
 
-    # Specifiy a database name
-    _db_name = 'habits.db'  # _db_name is a protected attribute
+    _db_name = 'habits.db'  # _db_name is a protected database name
 
-    # Initialize a new DatabaseStorage instance
     def __init__(self):
+        """Initializes new DatabaseStorage object and creates tables."""
         self._initialize_db()
 
     def _initialize_db(self):
         """
-        Initialize the database connection. Give SQL code instructions.
-        Create two tables, named habits and completions, for static and dynamic data.
+        Initializes database tables habits (static) and completions (dynamic) by SQL instructions.
+
+        Uses context manager for auto-closing connection.
         """
-        with sqlite3.connect(self._db_name) as conn:  # context manager, benefit of auto-closing
+        with sqlite3.connect(self._db_name) as conn:
             cursor = conn.cursor()
             cursor.execute("""
                            CREATE TABLE IF NOT EXISTS habits
@@ -40,28 +50,25 @@ class DatabaseStorage:
             conn.commit()
 
     def save_habit(self, habit):  # Saves current state of a habit to database
-        """Saves a habit to the database."""
+        """Saves current habit state to database (static metadata + dynamic completions)."""
         with sqlite3.connect(self._db_name) as conn:
             cursor = conn.cursor()
 
-            # Save static metadata
+            # Saves/updates static metadata
             if habit.habit_id:
-                # Update existing habit metadata in habits table
                 cursor.execute("""
                                UPDATE habits
                                SET name = ?, description = ?,period = ?
                                WHERE habit_id = ?
                                """, (habit.name, habit.description, habit.period, habit.habit_id))
             else:
-                # Insert new habit metadata into habits table
                 cursor.execute("""
                                INSERT INTO habits (name, description, period)
                                VALUES (?, ?, ?)
                                """, (habit.name, habit.description, habit.period))
                 habit.habit_id = int(cursor.lastrowid) # writes new habit.habit_id as last row of habits table
 
-            # Save dynamic tracking data
-            # Get existing completions for this habit
+            # Sync completions (insert new only)
             cursor.execute("""
                            SELECT completed_dates
                            FROM completions
@@ -69,7 +76,6 @@ class DatabaseStorage:
                            """, (habit.habit_id,))
             existing_dates = {row[0] for row in cursor.fetchall()}
 
-            # Insert new completions that don't already exist in the database
             for d in habit.completed_dates:
                 date = d.isoformat()
                 if date not in existing_dates:
@@ -82,7 +88,7 @@ class DatabaseStorage:
     # LOADING FROM DATABASE
     @classmethod
     def load_habit(cls, habit_id): # Habit retrieval by its ID from storage
-        """Retrieve a single habit by its ID along with its tracking data from storage."""
+        """Retrieves single habit by ID with completions and metadata."""
         with sqlite3.connect(cls._db_name) as conn:
             cursor = conn.cursor()
 
@@ -107,14 +113,14 @@ class DatabaseStorage:
             return habit
 
     def load_habit_ids(self):
-        """Get all habit IDs for loading all habits from the database."""
+        """Gets all habit IDs from database."""
         with sqlite3.connect(self._db_name) as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT habit_id FROM habits")
             return [(row[0]) for row in cursor.fetchall()]
 
     def load_all_habits(self):
-        """Load all habits and recompute streaks."""
+        """Loads all habits, populate completions, and recompute streaks."""
         ids = self.load_habit_ids()
         habits = []
         for habit_id in ids:
@@ -127,13 +133,14 @@ class DatabaseStorage:
 
     def delete_habit(self, habit_id):
         """
-        Delete habit by ID from both tables.
+        Deletes habit by ID from both tables (completions first).
 
         Args:
-            habit_id: int ID of habit to delete
+            habit_id (int):     ID of habit to delete
 
         Returns:
-            bool: True if deleted, False if not found
+            bool:               True if deleted
+                                False if not found
         """
         with sqlite3.connect(self._db_name) as conn:
             cursor = conn.cursor()
@@ -143,10 +150,10 @@ class DatabaseStorage:
             if not cursor.fetchone():
                 return False
 
-            # Delete completions first
+            # Deletes completions first
             cursor.execute("DELETE FROM completions WHERE habit_id = ?", (habit_id,))
 
-            # Delete habit
+            # Deletes habit
             cursor.execute("DELETE FROM habits WHERE habit_id = ?", (habit_id,))
 
             conn.commit()

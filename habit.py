@@ -1,28 +1,64 @@
+"""
+---------------------
+Habit Tracking Module
+---------------------
+Implements Habit class for completion logging and streak calculation in a Habit Tracker App.
+---------------------
+"""
+
 from datetime import timedelta, date  # to work with datetime formats import datetime module
 
 class Habit: # Create habit class
-    """Class determines single habit attributes and logic of habit completion and streak calculation."""
+    """Models a single habit and logic of habit completion and streak calculation for daily/ weekly habits."""
 
-    def __init__(self, name, description, period, habit_id=None): # initialize new instance with 3 attributes name, description and period
+    def __init__(self, name, description, period, habit_id=None):
+        """
+        Initializes new habit object.
+
+        Args:
+            name (str):                 Habit name.
+            description (str):          Habit description.
+            period (str):               'daily' or 'weekly' (lowercased).
+            habit_id (str, optional):   Unique ID for persistence
+
+        Note:
+            Streak starts at 0.
+            completed_dates is empty list.
+        """
         self.name = name
         self.description = description
-        self.period = period.lower() # 'daily' or 'weekly'
+        self.period = period.lower()
         self.habit_id = habit_id
-        self.streak = 0 # create new attribute streak, starting value = 0
-        self.completed_dates = [] # create empty list --> fill with date objects
+        self.longest_streak = 0
+        self.current_streak = 0
+        self.completed_dates = []
 
-    # PERFORM METHODS
     def complete_habit(self):
-        """Check off the habit as completed on a given date with today by default and updates streak."""
+        """
+        Checks-off a habit as completed today (by default) and update streak.
+
+        Returns:
+            bool:   True if newly added
+                    False if already completed today
+        """
         today = date.today()
         if today not in self.completed_dates:
-            self.completed_dates.append(today) # add new date entry to completed_dates list
+            self.completed_dates.append(today)
             self.compute_streak()
             return True
         else: return False
 
     def compute_streak(self):
-        """Compute longest streak based on periodicity ("daily" or "weekly")."""
+        """
+        Computes current and longest streak based on periodicity ('daily' or 'weekly').
+
+        Note:
+            daily:      Consecutive days
+            weekly:     7 to <14 days apart
+
+            Updates     self.current_streak
+                        self.longest_streak
+        """
         sorted_dates = sorted(self.completed_dates)
         if not sorted_dates:
             self.streak = 0
@@ -41,17 +77,18 @@ class Habit: # Create habit class
                 else:
                     current_streak = 1
 
+
         elif self.period == "weekly":
-            min_delta = timedelta(days=7)
-            max_delta = timedelta(days=14)
-            for i in range(1, len(sorted_dates)):
-                delta = sorted_dates[i] - sorted_dates[i - 1]
-                # Accept any date difference inclusive to 7 and exclusive to 14 days to continue streak
-                if min_delta <= delta < max_delta:
+           prev_week = sorted_dates[0].isocalendar()[1]
+           for date in sorted_dates[1:]:
+                curr_week = date.isocalendar()[1]
+                if curr_week == prev_week + 1:
                     current_streak += 1
-                    longest_streak = max(longest_streak, current_streak)    # Historical maximum
+                    longest_streak = max(longest_streak, current_streak)
                 else:
                     current_streak = 1
+                prev_week = curr_week
 
-        self.streak = longest_streak
+        self.longest_streak = longest_streak
+        self.current_streak = current_streak
 

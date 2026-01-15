@@ -6,9 +6,9 @@ Implements Habit class for completion logging and streak calculation in a Habit 
 ---------------------
 """
 
-from datetime import timedelta, date  # to work with datetime formats import datetime module
+from datetime import timedelta, date
 
-class Habit: # Create habit class
+class Habit:
     """Models a single habit and logic of habit completion and streak calculation for daily/ weekly habits."""
 
     def __init__(self, name, description, period, habit_id=None):
@@ -61,7 +61,8 @@ class Habit: # Create habit class
         """
         sorted_dates = sorted(self.completed_dates)
         if not sorted_dates:
-            self.streak = 0
+            self.current_streak = 0
+            self.longest_streak = 0
             return
 
         longest_streak = 1
@@ -76,7 +77,6 @@ class Habit: # Create habit class
                     longest_streak = max(longest_streak, current_streak)
                 else:
                     current_streak = 1
-
 
         elif self.period == "weekly":
            prev_week = sorted_dates[0].isocalendar()[1]

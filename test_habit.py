@@ -30,7 +30,7 @@ def test_streak_calc_daily():
     assert habit.longest_streak == 2    # Consecutive 10-11.12, breaks at 13.12
 
 def test_streak_calc_weekly():
-    """Test 2: Daily current and longest streaks - consecutive ISO weeks, breaks on +1 ISO week gap."""
+    """Test 3: Daily current and longest streaks - consecutive ISO weeks, breaks on +1 ISO week gap."""
     habit = Habit("Habit","Description", "Weekly")
     habit.completed_dates = [date(2026, 1, 1),      # ISO week 1: current = 1; longest = 1
                              date(2026, 1, 8),      # ISO week 2: current = 2; longest = 2

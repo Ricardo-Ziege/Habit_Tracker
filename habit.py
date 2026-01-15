@@ -19,7 +19,7 @@ class Habit: # Create habit class
             name (str):                 Habit name.
             description (str):          Habit description.
             period (str):               'daily' or 'weekly' (lowercased).
-            habit_id (str, optional):   Unique ID for persistence
+            habit_id (int, optional):   Unique ID for persistence
 
         Note:
             Streak starts at 0.
@@ -29,8 +29,8 @@ class Habit: # Create habit class
         self.description = description
         self.period = period.lower()
         self.habit_id = habit_id
-        self.longest_streak = 0
         self.current_streak = 0
+        self.longest_streak = 0
         self.completed_dates = []
 
     def complete_habit(self):

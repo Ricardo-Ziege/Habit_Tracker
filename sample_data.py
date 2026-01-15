@@ -26,7 +26,7 @@ def create_sample_habits_and_completions(today=None):
     """
     habit1 = Habit("Read","Read for 15min.","daily")
     habit2 = Habit("Play Guitar","Practice for 10min.", "daily")
-    habit3 = Habit("Cook Meal","Prepare a healthy meal for yourself and others", "daily")
+    habit3 = Habit("Cook Meal","Prepare a healthy meal", "daily")
     habit4 = Habit("Meditate","Meditate for 20min.", "weekly")
     habit5 = Habit( "Swim","Swim for 60min.", "weekly")
 

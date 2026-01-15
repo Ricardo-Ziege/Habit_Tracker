@@ -20,22 +20,22 @@ featuring analytics and SQLite persistence.
 - Sample data with 5 predefined habits (daily & weekly) and 4 weeks of completion data
 
 ### Architecture
+- CLI Interface: Interactive menu-driven interface for user interaction.
 - Habit class (OOP): Encapsulates habit data — habit name, description, periodicity and completion history.
 - HabitManager Class (OOP): Manages habit CRUD operations and provides clean API access.
 - Analytics Module (FP): Pure functions for aggregating and analyzing habit data without side effects.
-- Database: SQLite3 for persistence, handling schema and queries transparently.
-- CLI Interface: Interactive menu-driven interface for user interaction.
+- Storage: SQLite3 database for persistence, handling schema and queries transparently.
 
 ### Documentation
 Code is documented with Python docstrings. Key classes and functions include detailed docstrings
 explaining parameters, return values, and usage (Google style).
 
 ### Data Storage
-Habits and completion data are stored in (habits.db) (SQLite). The database is created automatically on first run.
+Habits and completion data are stored in 'habits.db' (SQLite). The database is created automatically on first run.
 
-### Example Data
-The application includes 5 predefined habits (3 daily, 2 weekly) with 4 weeks of example completion data for testing 
-and validation.
+### Sample Data
+The application includes 5 predefined habits (3x daily, 2x weekly) with 4 weeks of example completion data for testing 
+and validation. Sample data is loaded on the first run and when the database is empty or missing.
 
 ### Requirements
 - Python 3.7 or later
